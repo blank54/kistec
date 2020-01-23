@@ -3,8 +3,6 @@
 
 # Configuration
 import sys
-from kistec.data_import import save_df2excel, Article
-
 import os
 import re
 import time
@@ -13,6 +11,7 @@ import numpy as np
 import pickle as pk
 import pandas as pd
 import random
+from config import Config
 import GetOldTweets3 as got
 from tqdm import tqdm, tqdm_notebook
 from datetime import datetime, timedelta
@@ -22,6 +21,12 @@ import urllib.request
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from collections import defaultdict
+
+from kistec.object import *
+from kistec.function import *
+
+with open('./kistec/custom.cfg', 'r') as f:
+    cfg = Config(f)
 
 class KistecTweet:
     def tweet_crawling(self, query, start_date, end_date, time_lag=3, verbose=False):
@@ -114,7 +119,7 @@ class KistecNaverNews:
         self.article_url_list = kwargs.get('article_url_list', [])
         self.articles = ''
 
-        self.fdir_articles = kwargs.get('fdir_articles', './articles/')
+        self.fdir_articles = kwargs.get('fdir_articles', os.path.join(cfg.root, cfg.fdir_articles))
         self.fname_articles_excel = kwargs.get('fname_articles_excel', 'articles_{}_{}_{}.xlsx'.format(self.query, self.start_date, self.end_date))
 
         self._error_articles = []

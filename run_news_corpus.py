@@ -14,10 +14,10 @@ from kistec.data_import import *
 from kistec.preprocess import KistecPreprocess
 
 preprocess_config = {
-    'fname_userword': './thesaurus/userword.txt',
-    'fname_userdic': './thesaurus/userdic.txt',
-    'fname_stop': './thesaurus/stop_list.txt',
-    'fname_synonyms': './thesaurus/synonyms.txt'
+    'fname_userword': './corpus/thesaurus/userword.txt',
+    'fname_userdic': './corpus/thesaurus/userdic.txt',
+    'fname_stop': './corpus/thesaurus/stop_list.txt',
+    'fname_synonyms': './corpus/thesaurus/synonyms.txt'
     }
 kp = KistecPreprocess(**preprocess_config)
 kp.build_userdic()
@@ -55,8 +55,8 @@ def merge_docs(fdir_data):
         print('{}: {}'.format(facility, len(corpus[facility])))        
     return corpus
 
-fdir_data = './articles_20191223/'
-fname_docs_raw = './data/corpus_news_20191223.pk'
+fdir_data = '/data/blank54/workspace/kistec_workspace/data/news/20191223/'
+fname_docs_raw = './corpus/corpus_news_20191223.pk'
 # corpus = merge_docs(fdir_data)
 # with open(fname_docs_raw, 'wb') as f:
 #     pk.dump(corpus, f)
@@ -85,16 +85,16 @@ def drop_duplicates(corpus):
         print('{}: {}'.format(facility, len(corpus_drop_duplicate[facility])))
     return corpus_drop_duplicate
 
-fname_corpus = './data/corpus_news_20191223_drop_duplicate.pk'
-corpus_drop_duplicate = drop_duplicates(corpus)
-with open(fname_corpus, 'wb') as f:
-    pk.dump(corpus_drop_duplicate, f)
-# with open(fname_corpus, 'rb') as f:
-#     corpus_drop_duplicate = pk.load(f)
+fname_corpus = './corpus/corpus_news_20191223_drop_duplicate.pk'
+# corpus_drop_duplicate = drop_duplicates(corpus)
+# with open(fname_corpus, 'wb') as f:
+#     pk.dump(corpus_drop_duplicate, f)
+with open(fname_corpus, 'rb') as f:
+    corpus_drop_duplicate = pk.load(f)
 
 # Preprocessing
 def mark_needless(text):
-    with open('./thesaurus/needless_list.txt', 'r') as f:
+    with open('./corpus/thesaurus/needless_list.txt', 'r') as f:
         needless_list = f.read().replace('\n', '|')
     text = re.sub(needless_list, ' NEEDLESS ', text)
     return text
@@ -141,13 +141,6 @@ def preprocess(corpus):
                     if content_nouns_stop:
                         corpus_prep[facility].append(article)
                         df_facility = articles2df(corpus_prep[facility])
-                    
-                        # df_facility['id'].append(article.id)
-                        # df_facility['content'].append(article.content)
-                        # df_facility['content_nouns'].append(article.content_prep)
-                        # df_facility['comment_list'].append(article.comment_list)
-                        # df_facility['comment_count'].append(article.comment_count)
-                        # df_facility['url'].append(article.url)
                     else:
                         continue
                 else:
@@ -156,14 +149,14 @@ def preprocess(corpus):
         
         save_df2excel(
             data=pd.DataFrame(df_facility),
-            fname='./data/preprocessed/news_20191223_v2_{}.xlsx'.format(facility),
+            fname='./corpus/preprocessed/news/news_20191223_v2_{}.xlsx'.format(facility),
             verbose=True)
 
     return corpus_prep
 
-# fname_prep = './data/preprocessed/news_20191223_v2.pk'
-# corpus_prep = preprocess(corpus_drop_duplicate)
-# with open(fname_prep, 'wb') as f:
-#     pk.dump(corpus_prep, f)
-# with open(fname_prep, 'rb') as f:
-#     corpus_prep = pk.load(f)
+fname_prep = './corpus/preprocessed/news/news_20191223_v2.pk'
+corpus_prep = preprocess(corpus_drop_duplicate)
+with open(fname_prep, 'wb') as f:
+    pk.dump(corpus_prep, f)
+with open(fname_prep, 'rb') as f:
+    corpus_prep = pk.load(f)
