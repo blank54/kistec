@@ -13,10 +13,11 @@ from collections import defaultdict
 with open('./kistec/custom.cfg', 'r') as f:
     cfg = Config(f)
 
-def make_dir(fname):
-    if fname.split('/')[:-1]:
-        fdir = '/'.join(fname.split('/')[:-1])
-        os.makedirs(fdir, exist_ok=True)
+def makedir(path):
+    if path.endswith('/'):
+        os.makedirs(path, exist_ok=True)
+    else:
+        os.makedirs('/'.join(path.split('/')[:-1]), exist_ok=True)
 
 def save_df2excel(data, fname, verbose=False):
     make_dir(fname)
@@ -26,19 +27,6 @@ def save_df2excel(data, fname, verbose=False):
     writer.save()
     if verbose:
         print("Saved data as: {}".format(fname))
-
-def articles2df(articles):
-    data = defaultdict(list)
-    for article in articles:
-        data['id'].append(article.id)
-        data['date'].append(article.date)
-        data['content'].append(article.content)
-        data['content_nouns'].append(article.content_prep)
-        data['comment_list'].append(article.comment_list)
-        data['comment_count'].append(article.comment_count)
-        data['url'].append(article.url)
-        data['topic_id'].append(article.topic_id)
-    return pd.DataFrame(data)
 
 class KistecPreprocess:
     def _manage_duplicate(self):
@@ -63,9 +51,11 @@ class KistecPreprocess:
         self.fname_userdic = kwargs.get('fname_userdic', os.path.join(cfg.root, cfg.fname_userdic))
         self.fname_stop_list = kwargs.get('fname_stop_list', os.path.join(cfg.root, cfg.fname_stop_list))
         self.fname_synonyms = kwargs.get('fname_synonyms', os.path.join(cfg.root, cfg.fname_synonyms))
+        self.fname_needless_list = kwargs.get('fname_needless_list', os.path.join(cfg.root, cfg.fname_needless_list))
 
         self._manage_duplicate()
         self.stop_list = self._stop_list()
+        self.needless_list = self._needless_list()
 
     def _stop_list(self):
         with open(self.fname_stop_list, 'r', encoding='utf-8') as f:
@@ -109,5 +99,41 @@ class KistecPreprocess:
             return result
         elif return_type == 'str':
             return ' '.join(result)
+
+    def _needless_list(self):
+        with open(self.fname_needless_list, 'r', encoding='utf-8') as f:
+            needless_list = f.read().replace('\n', '|')
+        return needless_list
+
+    def _mark_needless(self, text):
+        
+        return re.sub(needless_list, ' NEEDLESS ', text)
+
+    def drop_needless(self, text):
+        marked_sent = self.tokenize(re.sub(self.needless_list, ' NEEDLESS ', text))
+        new_sent = []
+        needless_index_list = [i for i, w in enumerate(marked_sent) if w == 'NEEDLESS']
+
+        if needless_index_list:
+            for idx in range(len(needless_index_list)):
+                if idx == 0:
+                    new_sent.extend(marked_sent[:needless_index_list[idx]])
+                else:
+                    i = needless_index_list[idx-1]
+                    j = needless_index_list[idx]
+                    if (j-i) < 5:
+                        pass # NEEDLESS의 간격이 5단어 미만이면 -> 이건 광고!
+                    else:
+                        new_sent.extend(marked_sent[i:j])
+
+                if idx == (len(needless_index_list)-1):
+                    if (len(marked_sent) - needless_index_list[idx]) > 10: # 마지막 NEEDLESS 이후 10단어보다 많이 남았으면
+                        new_sent.extend(marked_sent[needless_index_list[idx]:])
+                    else:
+                        continue
+        else:
+            new_sent = marked_sent
+
+        return ' '.join([w for w in new_sent if not w == 'NEEDLESS'])
 
 KistecPreprocess()._manage_duplicate()

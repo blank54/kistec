@@ -1,87 +1,59 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-sys.path.append("/data/blank54/workspace/kistec/src/")
-from web_crawling import MyNaverNews
-
+# Configuration
+from kistec.web_crawling import *
 import os
-import json
-import dill
-import pandas as pd
-from collections import defaultdict
-from datetime import datetime, timedelta
+import itertools
+import pickle as pk
+from config import Config
 
-# User Input
-queries = ["건물", "사고", "붕괴"]
-start_dates = sorted(["20150101", "20150701", "20160101", "20160701", "20170101", 
-    "20170701", "20180101", "20180701", "20190101", "20190701"], reverse=True)
-end_dates = sorted(["20150630", "20151231", "20160630", "20161231", "20170630",
-    "20171231", "20180630", "20181231", "20190630", "20191031"], reverse=True)
+with open('./kistec/custom.cfg', 'r') as f:
+    cfg = Config(f)
 
-# Build Crawler
-def build_crawler(queries, start_date, end_date, operate=False):
-    query = "+".join(queries)
+# Query
+def get_query(fname_query):
+    with open(fname_query, 'r', encoding='utf-8') as f:
+        query_data = f.read()
 
-    fdir = os.getcwd()
-    fname_crawler = "model/naver_news_crawler_{}_{}_{}.dill".format(query,
-                                                                    start_date,
-                                                                    end_date)
+    query_groups = [[query for query in group.split('\n')] for group in query_data.split('\n\n')]
+    query_list = list(itertools.product(*query_groups))
+    return ['+'.join(queries) for queries in query_list]
 
-    if operate:
-        naver_news = MyNaverNews(queries, start_date, end_date)
-        with open(os.path.join(fdir, fname_crawler), "wb") as f:
-            dill.dump(naver_news, f)
+# Crawling
+def do_crawling(query, start_date, end_date):
+    fname_url_list = os.path.join(cfg.root, cfg.fdir_url_list_news, '{}_{}_{}.pk'.format(query, start_date, end_date))
 
-    else:
-        with open(os.path.join(fdir, fname_crawler), "rb") as f:
-            naver_news = dill.load(f)
-    return naver_news
+    crawling_config = {
+        'query': query,
+        'start_date': start_date,
+        'end_date': end_date
+        }
+    news_crawler = NewsCrawler(**crawling_config)
 
-# Get Article URLs
-def get_article_urls(naver_news, operate=False):
-    fname_urls = "data/naver_news_urls_{}_{}_{}.json".format(naver_news.query,
-                                                             naver_news.start_date,
-                                                             naver_news.end_date)
+    print('Naver News: Parse URL List ({}) ...'.format(query))
+    url_list = news_crawler.get_url_list()
+    with open(fname_url_list, 'wb') as f:
+        pk.dump(url_list, f)
+    # with open(fname_url_list, 'rb') as f:
+    #     url_list = pk.load(f)
+    print(len(url_list))
 
-    if operate:
-        url_articles = naver_news.url_articles()
+    print('Naver News: Parse Articles ({}) ...'.format(query))
+    news_crawler.url_list = url_list
+    articles = news_crawler.get_articles()
+    print(len(articles))
 
-        with open(os.path.join(os.getcwd(), fname_urls), "w", encoding="utf-8") as f:
-            json.dump(url_articles, f)
-        print("\nSaved: Naver News URLs \n({})".format(fname_urls))
-    else:
-        with open(os.path.join(os.getcwd(), fname_urls), "r", encoding="utf-8") as f:
-            url_articles = json.load(f)
-        print("\nLoaded: Naver News URLs \n({})".format(fname_urls))
-    return url_articles
+    print('Web Crawling Done: {}_{}_{}'.format(query, start_date, end_date))
 
-# Get Articles
-def get_article(naver_news, operate=False):
-    fdir = os.getcwd()
-    fname_article = "data/naver_news_articles_{}_{}_{}.xlsx".format(naver_news.query,
-                                                                    naver_news.start_date,
-                                                                    naver_news.end_date)
+# main
+def main():
+    fname_query = os.path.join(cfg.root, cfg.fdir_query_list, 'query_list_20200123.txt')
+    query_list = get_query(fname_query)
+    start_date = '20100101'
+    end_date = '20191231'
 
-    if operate:
-        df_naver = naver_news.articles()
-        writer = pd.ExcelWriter(os.path.join(fdir, fname_article))
-        df_naver.to_excel(writer, "Sheet1", index=False)
-        writer.save()
-        print("\nNaver News Crawling Complete: \n{} / {} to {}".format(naver_news.query,
-                                                                   naver_news.start_date,
-                                                                   naver_news.end_date))
+    for query in query_list:
+        do_crawling(query, start_date, end_date)
 
-    else:
-        df_naver = pd.read_excel(os.path.join(fdir, fname_article))
-        print("\nLoaded Naver News: \n{} / {} to {}".format(naver_news.query,
-                                                                   naver_news.start_date,
-                                                                   naver_news.end_date))
-
-    return df_naver
-
-# Web Crawling
-for start_date, end_date in zip(start_dates, end_dates):
-    naver_news = build_crawler(queries, start_date, end_date, operate=True)
-    url_articles = get_article_urls(naver_news, operate=True)
-    df_naver = get_article(naver_news, operate=True)
+main()

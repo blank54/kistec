@@ -98,7 +98,7 @@ class KistecTweet:
         print('Tweet Concatenation Complete: {}'.format(os.path.join(fdir, fname)))
         return data
 
-class KistecNaverNews:
+class NewsCrawler:
     def __init__(self, **kwargs):
         self.time_lag = np.random.normal(loc=kwargs.get('time_lag', 3.0), scale=1.0)
         self.headers = {'User-Agent': '''
@@ -116,15 +116,15 @@ class KistecNaverNews:
         self.samples = kwargs.get('samples', '')
 
         self.url_base = 'https://search.naver.com/search.naver?&where=news&query={}&sm=tab_pge&sort=1&photo=0&field=0&reporter_article=&pd=3&ds={}&de={}&docid=&nso=so:dd,p:from{}to{},a:all&mynews=0&start={}&refresh_start=0'
-        self.article_url_list = kwargs.get('article_url_list', [])
-        self.articles = ''
+        self.url_list = kwargs.get('url_list', [])
+        self.articles = kwargs.get('articles', [])
 
-        self.fdir_articles = kwargs.get('fdir_articles', os.path.join(cfg.root, cfg.fdir_articles))
-        self.fname_articles_excel = kwargs.get('fname_articles_excel', 'articles_{}_{}_{}.xlsx'.format(self.query, self.start_date, self.end_date))
+        self.fdir_news_articles = kwargs.get('fdir_news_articles', os.path.join(cfg.root, cfg.fdir_news_articles))
+        # self.fname_articles_excel = kwargs.get('fname_articles_excel', 'articles_{}_{}_{}.xlsx'.format(self.query, self.start_date, self.end_date))
 
-        self._error_articles = []
+        self._error = []
 
-        self.data = None
+        # self.data = None
 
     def _split_date(self):
         start_year, start_month, start_day = self._date_format(self.start_date).split('.')
@@ -183,30 +183,28 @@ class KistecNaverNews:
         href = soup.select('dl dd a')
         return [h.attrs['href'] for h in href if h.attrs['href'].startswith('https://news.naver.com/')]
 
-    def get_article_url_list(self):
-        if len(self.article_url_list) == 0:
-            print('Naver News: Parse URL List ...')
-            for start_date, end_date in self._split_date():
-                print('  >>Parsing ({} to {}) ...'.format(start_date, end_date))
-                last_page = self._last_page(start_date, end_date)
-                max_start_idx = int(round(last_page, -1)) + 1
-                index_list = list(range(1, max_start_idx, 10))
-                # 네이버는 최대 4000개까지만 제공함
-                with tqdm(total=len(index_list)) as pbar:
-                    for start_idx in index_list:
-                        start_date_datetime = self._date_format(start_date)
-                        end_date_datetime = self._date_format(end_date)
+    def get_url_list(self):
+        for start_date, end_date in self._split_date():
+            print('  >>Parsing ({} to {}) ...'.format(start_date, end_date))
+            last_page = self._last_page(start_date, end_date)
+            max_start_idx = int(round(last_page, -1)) + 1
+            index_list = list(range(1, max_start_idx, 10))
+            # 네이버는 최대 4000개까지만 제공함
+            with tqdm(total=len(index_list)) as pbar:
+                for start_idx in index_list:
+                    start_date_datetime = self._date_format(start_date)
+                    end_date_datetime = self._date_format(end_date)
 
-                        url_list_page = self.url_base.format(self.query_input,
-                                                             start_date_datetime,
-                                                             end_date_datetime,
-                                                             start_date,
-                                                             end_date,
-                                                             start_idx)
+                    url_list_page = self.url_base.format(self.query_input,
+                                                         start_date_datetime,
+                                                         end_date_datetime,
+                                                         start_date,
+                                                         end_date,
+                                                         start_idx)
 
-                        self.article_url_list.extend(self._parse_list_page(url_list_page))
-                        pbar.update(1)
-        return self.article_url_list
+                    self.url_list.extend(self._parse_list_page(url_list_page))
+                    pbar.update(1)
+        return self.url_list
 
     def _get_comment(self, url_article):
         comments = []
@@ -244,98 +242,103 @@ class KistecNaverNews:
         try:
             article_title = soup.select('h3[id=articleTitle]')[0].text
         except:
-            self._error_articles.append(url_article)
+            self._error.append(url_article)
             article_title = 'none'
 
         try:
             article_date = re.sub('\.', '', soup.select('span[class=t11]')[0].text.split(' ')[0])
         except:
-            self._error_articles.append(url_article)
+            self._error.append(url_article)
             article_date = 'none'
 
         try:
             article_category = soup.select('em[class=guide_categorization_item]')[0].text
         except:
-            self._error_articles.append(url_article)
+            self._error.append(url_article)
             article_category = 'none'
 
         try:
             article_content = soup.select('div[id=articleBodyContents]')[0].text.strip()
         except:
-            self._error_articles.append(url_article)
+            self._error.append(url_article)
             article_content = 'none'
 
 #         try:
 #             article_likeit_count_good = str(soup.select('li.u_likeit_list.good span.u_likeit_list_count._count')[0].text)
 #         except:
-#             self._error_articles.append(url_article)
+#             self._error.append(url_article)
 #             article_likeit_count_good = 'none'
 
 #         try:
 #             article_likeit_count_warm = str(soup.select('li.u_likeit_list.warm span.u_likeit_list_count._count')[0].text)
 #         except:
-#             self._error_articles.append(url_article)
+#             self._error.append(url_article)
 #             article_likeit_count_warm = 'none'
 
 #         try:
 #             article_likeit_count_sad = str(soup.select('li.u_likeit_list.sad span.u_likeit_list_count._count')[0].text)
 #         except:
-#             self._error_articles.append(url_article)
+#             self._error.append(url_article)
 #             article_likeit_count_sad = 'none'
 
 #         try:
 #             article_likeit_count_angry = str(soup.select('li.u_likeit_list.angry span.u_likeit_list_count._count')[0].text)
 #         except:
-#             self._error_articles.append(url_article)
+#             self._error.append(url_article)
 #             article_likeit_count_angry = 'none'
 
 #         try:
 #             article_likeit_count_want = str(soup.select('li.u_likeit_list.want span.u_likeit_list_count._count')[0].text)
 #         except:
-#             self._error_articles.append(url_article)
+#             self._error.append(url_article)
 #             article_likeit_count_want = 'none'
 
         try:
             article_comment_list = self._get_comment(url_article)
             article_comment_count = len(article_comment_list)
         except:
-            self._error_articles.append(url_article)
+            self._error.append(url_article)
             article_comment_list = ['none']
             article_comment_count = 0
             
-        article_config = {'url':url_article,
-                          'title':article_title,
-                          'date':article_date,
-                          'category':article_category,
-                          'content':article_content,
+        article_config = {
+            'url': url_article,
+            'title': article_title,
+            'date': article_date,
+            'category': article_category,
+            'content': article_content,
 
-#                           'likeit_good':article_likeit_count_good,
-#                           'likeit_warm':article_likeit_count_warm,
-#                           'likeit_sad':article_likeit_count_sad,
-#                           'likeit_angry':article_likeit_count_angry,
-#                           'likeit_want':article_likeit_count_want,
+            # 'likeit_good': article_likeit_count_good,
+            # 'likeit_warm': article_likeit_count_warm,
+            # 'likeit_sad': article_likeit_count_sad,
+            # 'likeit_angry': article_likeit_count_angry,
+            # 'likeit_want': article_likeit_count_want,
 
-                          'comment_list':article_comment_list,
-                          'comment_count':article_comment_count
-                          }
+            'comment_list': article_comment_list,
+            'comment_count': article_comment_count
+            }
 
         return Article(**article_config)
 
     def get_articles(self):
-        if len(self.articles) == 0:
-            print('Naver News: Parse Articles ...')
-            articles = []
-            article_url_list = self.get_article_url_list()
+        crawled_list = [fname for _, _, fname in os.walk(self.fdir_news_articles)]
+        url_list = self.url_list
+        if self.samples:
+            url_list = random.sample(url_list, self.samples)
 
-            if self.samples:
-                article_url_list = random.sample(article_url_list, self.samples)
+        with tqdm(total=len(url_list)) as pbar:
+            for idx, url in enumerate(url_list):
+                if '{}.pk'.format(url) in crawled_list:
+                    continue
+                else:
+                    article = self._parse_article_page(url)
+                    self.articles.append(article)
+                    fname_article = os.path.join(self.fdir_news_articles, article.date, '{}.pk'.format(article.url_uniq))
+                    makedir(fname_article)
+                    with open(fname_article, 'wb') as f:
+                        pk.dump(article, f)
+                pbar.update(1)
 
-            with tqdm(total=len(article_url_list)) as pbar:
-                for idx, url in enumerate(article_url_list):
-                    articles.append(self._parse_article_page(url))
-                    pbar.update(1)
-
-            self.articles = articles
         return self.articles
 
     def export_excel(self, articles):
@@ -359,15 +362,15 @@ class KistecNaverNews:
             articles_dict['url'].append(article.url)
 
         articles_dict_sort = pd.DataFrame(articles_dict).sort_values(by=['date'], axis=0)
-        fname_save = os.path.join(self.fdir_articles, self.fname_articles_excel)
+        fname_save = os.path.join(self.fdir_news_articles, self.fname_articles_excel)
         save_df2excel(articles_dict_sort, fname_save, verbose=True)
 
     def errors(self):
-        if not self._error_articles:
+        if not self._error:
             print('No error in articles')
             return None
         else:
-            return list(set(self._error_articles))
+            return list(set(self._error))
 
 def load_crawled_data(fdir, match, pattern):
     if match == 'start':

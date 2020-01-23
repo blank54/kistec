@@ -12,6 +12,7 @@ class Article:
     def __init__(self, **kwargs):
         self.id = kwargs.get('id', '')
         self.url = kwargs.get('url', '')
+        self.url_uniq = self.url.split('/')[-1]
         self.title = kwargs.get('title', '')
         self.date = kwargs.get('date', '')
         self.category = kwargs.get('category', '')
