@@ -134,4 +134,3 @@ dmypy.json
 *.html
 *.png
 data/
-.gitignore

@@ -13,7 +13,7 @@ with open('./kistec/custom.cfg', 'r') as f:
 
 # Query
 fname_query = os.path.join(cfg.root, cfg.fdir_query_list, 'query_list_20200123.txt')
-with open(fname_query, 'r') as f:
+with open(fname_query, 'r', encoding='utf-8') as f:
     query_data = f.read()
 
 query_groups = [[query for query in group.split('\n')] for group in query_data.split('\n\n')]
