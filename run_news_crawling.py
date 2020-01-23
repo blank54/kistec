@@ -23,6 +23,7 @@ def get_query(fname_query):
 # Crawling
 def do_crawling(query, start_date, end_date):
     fname_url_list = os.path.join(cfg.root, cfg.fdir_url_list_news, '{}_{}_{}.pk'.format(query, start_date, end_date))
+    makedir(fname_url_list)
 
     crawling_config = {
         'query': query,
