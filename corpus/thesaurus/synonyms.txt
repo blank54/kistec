@@ -5,7 +5,6 @@ CCTV 영상  단속카메라
 CCTV영상  단속카메라
 DB-18  DB18
 DB-24  DB24
-S  거더
 plate  플레이트
 slab  슬래브
 가드 레일  가드레일

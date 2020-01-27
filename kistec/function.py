@@ -20,7 +20,7 @@ def makedir(path):
         os.makedirs('/'.join(path.split('/')[:-1]), exist_ok=True)
 
 def save_df2excel(data, fname, verbose=False):
-    make_dir(fname)
+    makedir(fname)
         
     writer = pd.ExcelWriter(fname)
     data.to_excel(writer, "Sheet1", index=False)
@@ -55,6 +55,7 @@ class KistecPreprocess:
 
         self._manage_duplicate()
         self.stop_list = self._stop_list()
+        self.synonym_pairs = self._synonym_pairs()
         self.needless_list = self._needless_list()
 
     def _stop_list(self):
@@ -70,17 +71,16 @@ class KistecPreprocess:
         with open(self.fname_userdic, 'w', encoding='utf-8') as f:
             f.write(re.sub('\ufeff', '', userdic))
 
-    def synonym(self, text):
+    def _synonym_pairs(self):
         with open(self.fname_synonyms, 'r', encoding='utf-8') as f:
-            data = f.read()
-            if not data:
-                return text
+            synonym_data = f.read()
+        synonym_list = re.sub('\ufeff', '', synonym_data.strip())
+        synonym_pairs = [tuple(pair.split('  ')) for pair in synonym_list.split('\n')]
+        return synonym_pairs
 
-            synonyms = re.sub('\ufeff', '', data.strip())
-            pairs = [tuple(pair.split('  ')) for pair in synonyms.split('\n')]
-
-        if any([True for l, r in pairs if l in text]):
-            for l, r in pairs:
+    def synonym(self, text):
+        if any([True for l, r in self.synonym_pairs if l in text]):
+            for l, r in self.synonym_pairs:
                 text = re.sub(l, r, text)
         return text
 
@@ -121,19 +121,20 @@ class KistecPreprocess:
                 else:
                     i = needless_index_list[idx-1]
                     j = needless_index_list[idx]
-                    if (j-i) < 5:
-                        pass # NEEDLESS의 간격이 5단어 미만이면 -> 이건 광고!
+                    if (j-i) < 3:
+                        pass # NEEDLESS의 간격이 3단어 미만이면 -> 이건 광고!
                     else:
                         new_sent.extend(marked_sent[i:j])
 
                 if idx == (len(needless_index_list)-1):
-                    if (len(marked_sent) - needless_index_list[idx]) > 10: # 마지막 NEEDLESS 이후 10단어보다 많이 남았으면
+                    if (len(marked_sent) - needless_index_list[idx]) > 10: # 마지막 NEEDLESS 이후 7단어보다 많이 남았으면
                         new_sent.extend(marked_sent[needless_index_list[idx]:])
                     else:
                         continue
         else:
             new_sent = marked_sent
 
-        return ' '.join([w for w in new_sent if not w == 'NEEDLESS'])
+        new_text = ' '.join([w for w in new_sent if not w == 'NEEDLESS'])
+        return re.sub('[^0-9a-zA-Zㄱ-힣]', ' ', new_text)
 
 KistecPreprocess()._manage_duplicate()
