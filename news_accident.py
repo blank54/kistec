@@ -168,31 +168,33 @@ def timeline_graph(query, assigned_data, topic_id_list, fdir_trend_plt):
         y_freq[time].append(article['id'])
         y_comment[time] += int(article['comment_count'])
 
-    f1 = plt.figure(num=1, figsize=(40,30))
+    f1 = plt.figure(num=1, figsize=(16,12))
     plt.plot(sorted(x), [len(y) for _, y in sorted(y_freq.items(), key=lambda x:x[0])])
     plt.title('Article Frequency: {}_{}'.format(query, topic_ids))
     plt.xlabel('Month')
     plt.ylabel('Frequency')
-    plt.xticks(rotation=60)
+    plt.xticks(rotation=60, fontsize=10)
     plt.yticks(range(0, max([len(y) for _, y in y_freq.items()]), int(max([len(y) for _, y in y_freq.items()])/10)))
-    plt.savefig(fname_plt_frequency, dpi=600)
+    plt.grid()
+    plt.savefig(fname_plt_frequency, dpi=300)
     plt.clf()
 
-    f2 = plt.figure(num=1, figsize=(40,30))
+    f2 = plt.figure(num=1, figsize=(16,12))
     plt.plot(sorted(x), [y for _, y in sorted(y_comment.items(), key=lambda x:x[0])])
     plt.title('Comments Count: {}_{}'.format(query, topic_ids))
     plt.xlabel('Month')
     plt.ylabel('Comments')
-    plt.xticks(rotation=60)
+    plt.xticks(rotation=60, fontsize=10)
     plt.yticks(range(0, max([y for _, y in y_comment.items()]), int(max([y for _, y in y_comment.items()])/10)))
-    plt.savefig(fname_plt_comments, dpi=600)
+    plt.grid()
+    plt.savefig(fname_plt_comments, dpi=300)
     plt.clf()
 
     print(fname_plt_frequency)
     print(fname_plt_comments)
 
 def main():
-    query_list = ['교량+사고', '터널+사고', '건물+사고']
+    query_list = ['건물+사고'] #  '교량+사고', '터널+사고'
     for query in query_list:
     # query = '교량+사고'
         fname_lda_tuning_result = os.path.join(cfg.root, cfg.fdir_lda_tuning_news_accident, '{}.xlsx'.format(query))
@@ -226,6 +228,6 @@ def main():
 
         print('Line Graph: {}'.format(query))
         for topic_id in range(lda_model.num_topics):
-            topic_id_list = [topic_id]
+            topic_id_list = [topic_id] # 0, 1
             timeline_graph(query, assigned_data, topic_id_list, fdir_trend_plt)
 main()
