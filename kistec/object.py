@@ -8,6 +8,10 @@ import pandas as pd
 from tqdm import tqdm
 from collections import defaultdict
 
+from config import Config
+with open('./kistec/custom.cfg', 'r') as f:
+    cfg = Config(f)
+
 class Article:
     def __init__(self, **kwargs):
         self.id = kwargs.get('id', '')

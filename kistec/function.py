@@ -6,10 +6,10 @@ import os
 import re
 import pickle as pk
 import pandas as pd
-from config import Config
 from tqdm import tqdm
 from collections import defaultdict
 
+from config import Config
 with open('./kistec/custom.cfg', 'r') as f:
     cfg = Config(f)
 

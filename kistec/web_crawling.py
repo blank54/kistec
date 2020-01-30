@@ -11,7 +11,6 @@ import numpy as np
 import pickle as pk
 import pandas as pd
 import random
-from config import Config
 import GetOldTweets3 as got
 from tqdm import tqdm, tqdm_notebook
 from datetime import datetime, timedelta
@@ -25,6 +24,7 @@ from collections import defaultdict
 from kistec.object import *
 from kistec.function import *
 
+from config import Config
 with open('./kistec/custom.cfg', 'r') as f:
     cfg = Config(f)
 
