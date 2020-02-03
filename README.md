@@ -11,15 +11,8 @@ Text Analysis of Facility Maintenance System
 - Main Developer: Seonghyeon Boris Moon (blank54@snu.ac.kr, https://github.com/blank54/)
 - Sub Developer: Taeyeon Chang (jgwoon1838@snu.ac.kr, _a.k.a. Kowoon Chang_)
 
-
-
-
-
-
-
-
 - - -
-## <details><summary>Usage of NewsCrawler</summary>
+## Usage of NewsCrawler
 ```
 from config import Config
 with open(FNAME_YOUR_CONFIG, 'r') as f:
@@ -37,4 +30,3 @@ url_list = news_crawler.get_url_list()
 articles = news_crawler.get_articles()
 ```
 The results(i.e., **_url_list.pk_**, **_article.pk_**, **_articles.xlsx_**) would be saved as each **_fname_** in config
-</details>
