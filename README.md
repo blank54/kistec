@@ -1,4 +1,16 @@
-# KISTEC X C!LAB PROJECT
+# KISTEC X C!LAB
+Text Analysis of Facility Maintenance System
+- - -
+## _Project Information_
+- Performed by C!LAB (@Seoul Nat'l Univ.)
+- Supported by KISTEC
+- Duration: 2019. - 2020.
+
+## _Contributors_
+- Project Director: Seokho Chi, _Ph.D._, _Associate Prof._ (shchi@snu.ac.kr, https://cm.lab.ac.kr/)
+- Main Developer: Seonghyeon Boris Moon (blank54@snu.ac.kr, https://github.com/blank54/)
+- Sub Developer: Taeyon Chang (_a.k.a. Kowoon Chang_, jgwoon1838@snu.ac.kr)
+
 <!-- 
 ## Configuration
 './thesaurus' 폴더 하위에 다음의 파일이 필요함
