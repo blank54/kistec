@@ -9,7 +9,18 @@ Text Analysis of Facility Maintenance System
 ## _Contributors_
 - Project Director: Seokho Chi, _Ph.D._, _Associate Prof._ (shchi@snu.ac.kr, https://cm.lab.ac.kr/)
 - Main Developer: Seonghyeon Boris Moon (blank54@snu.ac.kr, https://github.com/blank54/)
-- Sub Developer: Taeyon Chang (_a.k.a. Kowoon Chang_, jgwoon1838@snu.ac.kr)
+- Sub Developer: Taeyon Chang (jgwoon1838@snu.ac.kr, _a.k.a. Kowoon Chang_)
+
+- - -
+## Usage of NewsCrawler
+    from config import Config
+    with open(FNAME_YOUR_CONFIG, 'r') as f:
+        cfg = Config(f)
+
+    from kistec import NewsCrawler
+
+    input_query = YOUR_QUERY # e.g. 교량+사고+유지관리
+    date_from = YOUR_DATE_FROM # e.g., 
 
 <!-- 
 ## Configuration
