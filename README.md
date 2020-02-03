@@ -7,9 +7,10 @@ Text Analysis of Facility Maintenance System
 - Duration: 2019. - 2020.
 
 ## _Contributors_
-- Project Director: Seokho Chi, _Ph.D._, _Associate Prof._ (shchi@snu.ac.kr, https://cm.lab.ac.kr/)
+- Project Director: Seokho Chi, _Ph.D._, _Associate Prof._ (shchi@snu.ac.kr, https://cm.snu.ac.kr/)
 - Main Developer: Seonghyeon Boris Moon (blank54@snu.ac.kr, https://github.com/blank54/)
-- Sub Developer: Taeyon Chang (jgwoon1838@snu.ac.kr, _a.k.a. Kowoon Chang_)
+- Sub Developer: Taeyeon Chang (jgwoon1838@snu.ac.kr, _a.k.a. Kowoon Chang_)
+
 
 - - -
 ## Usage of NewsCrawler
@@ -19,39 +20,13 @@ Text Analysis of Facility Maintenance System
 
     from kistec import NewsCrawler
 
-    input_query = YOUR_QUERY # e.g. 교량+사고+유지관리
-    date_from = YOUR_DATE_FROM # e.g., 
+    input_query = YOUR_QUERY    # '교량+사고+유지관리'
+    date_from = YOUR_DATE_FROM  # '20190701'
+    date_to = YOUR_DATE_TO      # '20190705'
 
-<!-- 
-## Configuration
-'./thesaurus' 폴더 하위에 다음의 파일이 필요함
-* stop_list.txt
-* synonyms.txt
-* userword.txt
+    news_crawler = NewsCrawler(**crawling_config)
 
+    url_list = news_crawler.get_url_list()
+    articles = news_crawler.get_articles()
 
-## Import Library
-    sys.path.append(../kistec/)
-    from preprocess import MyPreprocess
-    mp = MyPreprocess()
-    
-## Preprocess
-### Apply synonyms
-    sent = '배수 시설은 배수시설로 배수관도 배수시설로 배수만 있는 건 그대로'
-    sent_synonym = mp.synonym(sent)
-    print(sent_synonym)
-
-### Stopword Removal
-    sent_stop = mp.stopword_removal(sent_synonym, return_type='str') # Default return type: list
-    print(sent_stop)
-
-### Customized PoS tagging
-    from konlpy.tag import Komoran
-
-    mp.build_userdic('./thesaurus/userword.txt')
-    komoran = Komoran(userdic=mp.fname_userdic) # './thesaurus/userdic.txt'
-
-    print(sent)
-    print(komoran.nouns(sent))
-    print(komoran.nouns(sent_synonym))
-    print(komoran.nouns(sent_stop)) -->
+The results(i.e., _url_list.pk_, _article.pk_, _articles.xlsx_) would be saved as each _fname_ in config
