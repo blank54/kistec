@@ -19,7 +19,7 @@ Text Analysis of Facility Maintenance System
 
 
 - - -
-<details><summary>## Usage of NewsCrawler</summary>
+## <details><summary>Usage of NewsCrawler</summary>
 ```
 from config import Config
 with open(FNAME_YOUR_CONFIG, 'r') as f:
