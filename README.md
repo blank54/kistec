@@ -12,22 +12,29 @@ Text Analysis of Facility Maintenance System
 - Sub Developer: Taeyeon Chang (jgwoon1838@snu.ac.kr, _a.k.a. Kowoon Chang_)
 
 
+
+
+
+
+
+
 - - -
-## Usage of NewsCrawler
-    from config import Config
-    with open(FNAME_YOUR_CONFIG, 'r') as f:
-        cfg = Config(f)
+<details><summary>## Usage of NewsCrawler</summary>
+```
+from config import Config
+with open(FNAME_YOUR_CONFIG, 'r') as f:
+    cfg = Config(f)
 
-    from kistec import NewsCrawler
+from kistec import NewsCrawler
 
-    input_query = YOUR_QUERY    # '교량+사고+유지관리'
-    date_from = YOUR_DATE_FROM  # '20190701'
-    date_to = YOUR_DATE_TO      # '20190705'
+input_query = YOUR_QUERY    # '교량+사고+유지관리'
+date_from = YOUR_DATE_FROM  # '20190701'
+date_to = YOUR_DATE_TO      # '20190705'
 
-    news_crawler = NewsCrawler(**crawling_config)
+news_crawler = NewsCrawler(**crawling_config)
 
-    url_list = news_crawler.get_url_list()
-    articles = news_crawler.get_articles()
-
-
+url_list = news_crawler.get_url_list()
+articles = news_crawler.get_articles()
+```
 The results(i.e., **_url_list.pk_**, **_article.pk_**, **_articles.xlsx_**) would be saved as each **_fname_** in config
+</details>
