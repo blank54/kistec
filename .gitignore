@@ -134,3 +134,6 @@ dmypy.json
 *.html
 *.png
 data/
+corpus/
+run*.py
+tmp*.py
