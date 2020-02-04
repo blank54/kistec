@@ -12,7 +12,7 @@ Text Analysis of Facility Maintenance System
 - Sub Developer: Taeyeon Chang (jgwoon1838@snu.ac.kr, _a.k.a. Kowoon Chang_)
 
 - - -
-## Usage of NewsCrawler
+## NewsCrawler
 ```
 from config import Config
 with open(FNAME_YOUR_CONFIG, 'r') as f:
